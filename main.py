@@ -5,7 +5,6 @@ import csv
 
 csv_file = 'spam.csv'
 
-
 def read_file():
     label = []
     msg = []
@@ -16,12 +15,17 @@ def read_file():
 
     return label, msg
 
+def tokenize(messages):
+    for index in range(len(messages)):
+        messages[index]=messages[index].split()
 
 def main():
     label, msg = read_file()
+    tokenize(msg)
     print(label)
-    print(msg)
 
+    for x in range(len(msg)):
+        print(msg[x])
 
 if __name__ == '__main__':
     main()
