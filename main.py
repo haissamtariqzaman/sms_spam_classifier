@@ -1,16 +1,28 @@
-# This is a sample Python script.
+import numpy as np
+import pandas as pd
+import os
+import csv
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+csv_file = 'spam.csv'
 
 
-# Press the green button in the gutter to run the script.
+def read_file():
+    label = []
+    msg = []
+    with open(csv_file, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            label.append(row.get('v1'))
+            msg.append(row.get('v2'))
+
+    return label, msg
+
+
+def main():
+    label, msg = read_file()
+    print(label)
+    print(msg)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()
