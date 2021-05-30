@@ -9,11 +9,10 @@ csv_file = 'spam.csv'
 def read_file():
     label = []
     msg = []
-    with open(csv_file, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            label.append(row.get('v1'))
-            msg.append(row.get('v2'))
+    dataset = pd.read_csv(csv_file)
+    for l in range(len(dataset)):
+        label.append(row.get('v1'))
+        msg.append(row.get('v2'))
 
     return label, msg
 
