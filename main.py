@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import re
 import csv
 
 csv_file = 'spam.csv'
@@ -20,13 +21,23 @@ def tokenize(messages):
     for index in range(len(messages)):
         messages[index]=messages[index].split()
 
+def removeURLs(messages):
+    for x in range(len(messages)):
+        sentenceLen = len(messages[x])
+        y=0
+        while y<sentenceLen:
+            result = re.search("^http://|^https://|^www\.", messages[x][y])
+            if (result != None):
+                del messages[x][y]
+                sentenceLen-=1;
+            else:
+                y+=1
+
 def main():
     label, msg = read_file()
     tokenize(msg)
     print(label)
-
-    for x in range(len(msg)):
-        print(msg[x])
+    removeURLs(msg)
 
 if __name__ == '__main__':
     main()
