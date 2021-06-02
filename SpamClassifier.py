@@ -30,6 +30,33 @@ class SpamClassifier:
         for index in range(len(self.messages)):
             self.messages[index] = self.messages[index].split()
 
+    def removePunc(self):
+        test_list = []
+        alpha = 'a'
+        for i in range(0, 26):
+            test_list.append(alpha)
+            alpha = chr(ord(alpha) + 1)
+        alpha = 'A'
+        for i in range(0, 26):
+            test_list.append(alpha)
+            alpha = chr(ord(alpha) + 1)
+
+        print(test_list)
+        counter = 0
+        nullSTR = ""
+        for x in range(len(self.messages)):
+            for y in range(len(self.messages[x])):
+                counter = len(self.messages[x][y])
+                z = 0
+                nullSTR = ""
+                while z < counter:
+                    if self.messages[x][y][z] in test_list:
+                        nullSTR = nullSTR + self.messages[x][y][z]
+                    z += 1
+                self.messages[x][y] = nullSTR
+
+        #print(self.messages)
+
     def removeURLs(self):
         for x in range(len(self.messages)):
             sentenceLen = len(self.messages[x])

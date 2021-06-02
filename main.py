@@ -6,6 +6,7 @@ def main():
     spam_classifier.fixContractions()
     spam_classifier.tokenize()
     spam_classifier.removeURLs()
+    spam_classifier.removePunc()
     spam_classifier.removeStopWords()
     spam_classifier.printMessages()
     spam_classifier.printLabels()
