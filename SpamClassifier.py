@@ -1,3 +1,5 @@
+from nltk.corpus import stopwords
+from keras.preprocessing.text import Tokenizer
 import numpy as np
 import pandas as pd
 import os
@@ -5,19 +7,24 @@ import re
 import csv
 import contractions
 import nltk
+
 nltk.download('stopwords')
-from nltk.corpus import stopwords
+
 
 class SpamClassifier:
+    fileName = None
+    messages = None
+    label = None
+    n_label = None
+    message_sequence = None
+    tokenizer=None
 
-    fileName=None
-    messages=None
-    label=None
-
-    def __init__(self,fileName):
-        self.fileName=fileName
-        self.label=[]
-        self.messages=[]
+    def __init__(self, fileName):
+        self.fileName = fileName
+        self.label = []
+        self.messages = []
+        self.n_label = []
+        self.tokenizer=Tokenizer()
 
     def read_file(self):
         with open(self.fileName, 'r', encoding='latin-1') as f:
@@ -41,7 +48,7 @@ class SpamClassifier:
             test_list.append(alpha)
             alpha = chr(ord(alpha) + 1)
 
-        print(test_list)
+        #print(test_list)
         counter = 0
         nullSTR = ""
         for x in range(len(self.messages)):
@@ -55,7 +62,7 @@ class SpamClassifier:
                     z += 1
                 self.messages[x][y] = nullSTR
 
-        #print(self.messages)
+        # print(self.messages)
 
     def removeURLs(self):
         for x in range(len(self.messages)):
@@ -76,11 +83,11 @@ class SpamClassifier:
     def toLowerCase(self):
         for x in range(len(self.messages)):
             for y in range(len(self.messages[x])):
-                self.messages[x][y]=self.messages[x][y].lower()
+                self.messages[x][y] = self.messages[x][y].lower()
 
     def removeStopWords(self):
         self.toLowerCase()
-        stopWords=stopwords.words('english')
+        stopWords = stopwords.words('english')
 
         for x in range(len(self.messages)):
             sentenceLen = len(self.messages[x])
@@ -88,9 +95,9 @@ class SpamClassifier:
             while y < sentenceLen:
                 if self.messages[x][y] in stopWords:
                     del self.messages[x][y]
-                    sentenceLen-=1
+                    sentenceLen -= 1
                 else:
-                    y+=1
+                    y += 1
 
     def printMessages(self):
         for sentence in self.messages:
@@ -98,3 +105,24 @@ class SpamClassifier:
 
     def printLabels(self):
         print(self.label)
+
+    def printn_labels(self):
+        print(self.n_label)
+
+    def labelsToNumeric(self):
+        for lbl in self.label:
+            if lbl == "spam":
+                self.n_label.append(1)
+            else:
+                self.n_label.append(0)
+
+    def printMessageSequence(self):
+        print(self.message_sequence)
+
+    def join(self):
+        for x in range(len(self.messages)):
+            self.messages[x]=" ".join(self.messages[x])
+
+    def messageToNumeric(self):
+        self.tokenizer.fit_on_texts(self.messages)
+        self.message_sequence = self.tokenizer.texts_to_sequences(self.messages)
