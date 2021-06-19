@@ -11,7 +11,7 @@ def main():
     spam_classifier.labelsToNumeric()
     spam_classifier.join()
     spam_classifier.messageToNumeric()
+    spam_classifier.makeSameSize()
     spam_classifier.printMessageSequence()
-
 if __name__ == '__main__':
     main()

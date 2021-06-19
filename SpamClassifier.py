@@ -1,12 +1,9 @@
-from nltk.corpus import stopwords
-from keras.preprocessing.text import Tokenizer
-import numpy as np
-import pandas as pd
-import os
-import re
-import csv
 import contractions
+import csv
 import nltk
+import re
+from keras.preprocessing.text import Tokenizer
+from nltk.corpus import stopwords
 
 nltk.download('stopwords')
 
@@ -17,14 +14,14 @@ class SpamClassifier:
     label = None
     n_label = None
     message_sequence = None
-    tokenizer=None
+    tokenizer = None
 
     def __init__(self, fileName):
         self.fileName = fileName
         self.label = []
         self.messages = []
         self.n_label = []
-        self.tokenizer=Tokenizer()
+        self.tokenizer = Tokenizer()
 
     def read_file(self):
         with open(self.fileName, 'r', encoding='latin-1') as f:
@@ -48,7 +45,7 @@ class SpamClassifier:
             test_list.append(alpha)
             alpha = chr(ord(alpha) + 1)
 
-        #print(test_list)
+        # print(test_list)
         counter = 0
         nullSTR = ""
         for x in range(len(self.messages)):
@@ -121,8 +118,27 @@ class SpamClassifier:
 
     def join(self):
         for x in range(len(self.messages)):
-            self.messages[x]=" ".join(self.messages[x])
+            self.messages[x] = " ".join(self.messages[x])
 
     def messageToNumeric(self):
         self.tokenizer.fit_on_texts(self.messages)
         self.message_sequence = self.tokenizer.texts_to_sequences(self.messages)
+
+    def makeSameSize(self):
+
+        longest = []
+        max_len = 0
+        for x in self.message_sequence:
+            l = len(x)
+            if l > max_len:
+                max_len = l
+            #print(l)
+            #print(max_len)
+        print("-------------------------------------------------")
+        for x in self.message_sequence:
+            if len(x) != max_len:
+                diff = max_len - len(x)
+                for i in range(diff):
+                    x.append(0)
+                x.sort()
+            #print(len(x))
