@@ -20,8 +20,8 @@ class SpamClassifier:
     n_label = None
     message_sequence = None
     tokenizer = None
-    VOC_SIZE=None
-    max_length_sequence=None
+    VOC_SIZE = None
+    max_length_sequence = None
 
     def __init__(self, fileName):
         self.fileName = fileName
@@ -130,49 +130,126 @@ class SpamClassifier:
     def messageToNumeric(self):
         self.tokenizer.fit_on_texts(self.messages)
         self.message_sequence = self.tokenizer.texts_to_sequences(self.messages)
-        self.VOC_SIZE =len(self.tokenizer.word_index)+1
+        self.VOC_SIZE = len(self.tokenizer.word_index) + 1
 
     def makeSameSize(self):
 
-        longest = []
         max_len = 0
         for x in self.message_sequence:
             l = len(x)
             if l > max_len:
                 max_len = l
-            #print(l)
-            #print(max_len)
-        print("-------------------------------------------------")
 
-        self.max_length_sequence=max_len
+        self.max_length_sequence = max_len
 
         for x in self.message_sequence:
             if len(x) != max_len:
                 diff = max_len - len(x)
                 for i in range(diff):
-                    x.append(0)
-                x.sort()
-            #print(len(x))
+                    x.insert(0, 0)
 
+    # -----------------------------------------------------------------------------------------------------------
+    def convertMessage(self, message):
+        message = contractions.fix(message)
+        message = message.split()
+        message = self.remove_url_msg(message)
+        message = self.remove_punc_msg(message)
+        message = self.remove_stop_words_msg(message)
+        message = " ".join(message)
+        message = self.message_to_numeric_msg(message)
+        message = self.make_same_size_msg(message)
+        print(message)
+
+
+    def remove_url_msg(self, message):
+        y = 0
+        sentence_len = len(message)
+        while y < sentence_len:
+            result = re.search("^http://|^https://|^www\.", self.messages[y])
+            if result is not None:
+                del self.messages[y]
+                sentence_len -= 1
+            else:
+                y += 1
+        return message
+
+    def remove_punc_msg(self, message):
+        test_list = []
+        alpha = 'a'
+        for i in range(0, 26):
+            test_list.append(alpha)
+            alpha = chr(ord(alpha) + 1)
+        alpha = 'A'
+        for i in range(0, 26):
+            test_list.append(alpha)
+            alpha = chr(ord(alpha) + 1)
+
+        counter = 0
+        nullSTR = ""
+        for y in range(len(message)):
+            counter = len(message[y])
+            z = 0
+            nullSTR = ""
+            while z < counter:
+                if message[y][z] in test_list:
+                    nullSTR = nullSTR + message[y][z]
+                z += 1
+            message[y] = nullSTR
+
+        return message
+
+    def to_lower_case_msg(self, message):
+        for y in range(len(message)):
+            message[y] = message[y].lower()
+        return message
+
+    def remove_stop_words_msg(self, message):
+        message = self.to_lower_case_msg(message)
+        stopWords = stopwords.words('english')
+        sentenceLen = len(message)
+        y = 0
+        while y < sentenceLen:
+            if message[y] in stopWords:
+                del message[y]
+                sentenceLen -= 1
+            else:
+                y += 1
+        return message
+
+    #TO BE EDITED BY HAISSAM-------------------
+    def message_to_numeric_msg(self, message):
+        self.tokenizer.fit_on_texts(message)
+        self.message_sequence = self.tokenizer.texts_to_sequences(message)
+        return message
+
+    def make_same_size_msg(self, message):
+        for x in message:
+            if len(message) != self.max_length_sequence:
+                diff = self.max_length_sequence - len(message)
+                for i in range(diff):
+                    x.insert(0, 0)
+        return message
+
+#----------------------------------------------------------------------------------------------------
     def LSTMModel(self):
 
-        self.message_sequence=np.array(self.message_sequence)
-        self.n_label=np.array(self.n_label)
+        self.message_sequence = np.array(self.message_sequence)
+        self.n_label = np.array(self.n_label)
 
         print(self.n_label.shape)
 
         model = Sequential()
 
         feature_num = 100
-        model.add(Embedding(input_dim=self.VOC_SIZE,output_dim=feature_num,input_length=self.max_length_sequence))
+        model.add(Embedding(input_dim=self.VOC_SIZE, output_dim=feature_num, input_length=self.max_length_sequence))
         model.add(LSTM(units=128))
-        model.add(Dense(units=1,activation="sigmoid"))
+        model.add(Dense(units=1, activation="sigmoid"))
 
-        model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
+        model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
         model.summary()
 
-        model.fit(self.message_sequence, self.n_label, epochs = 5, batch_size=32, validation_split=0.2)
+        model.fit(self.message_sequence, self.n_label, epochs=5, batch_size=32, validation_split=0.2)
 
-        y_pred=model.predict(self.message_sequence)
+        y_pred = model.predict(self.message_sequence)
         y_pred = (y_pred > 0.5)
         print(y_pred)
