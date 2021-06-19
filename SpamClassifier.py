@@ -2,8 +2,13 @@ import contractions
 import csv
 import nltk
 import re
+
+import numpy as np
+from keras.layers import LSTM
 from keras.preprocessing.text import Tokenizer
 from nltk.corpus import stopwords
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM
 
 nltk.download('stopwords')
 
@@ -15,6 +20,8 @@ class SpamClassifier:
     n_label = None
     message_sequence = None
     tokenizer = None
+    VOC_SIZE=None
+    max_length_sequence=None
 
     def __init__(self, fileName):
         self.fileName = fileName
@@ -123,6 +130,7 @@ class SpamClassifier:
     def messageToNumeric(self):
         self.tokenizer.fit_on_texts(self.messages)
         self.message_sequence = self.tokenizer.texts_to_sequences(self.messages)
+        self.VOC_SIZE =len(self.tokenizer.word_index)+1
 
     def makeSameSize(self):
 
@@ -135,6 +143,9 @@ class SpamClassifier:
             #print(l)
             #print(max_len)
         print("-------------------------------------------------")
+
+        self.max_length_sequence=max_len
+
         for x in self.message_sequence:
             if len(x) != max_len:
                 diff = max_len - len(x)
@@ -142,3 +153,26 @@ class SpamClassifier:
                     x.append(0)
                 x.sort()
             #print(len(x))
+
+    def LSTMModel(self):
+
+        self.message_sequence=np.array(self.message_sequence)
+        self.n_label=np.array(self.n_label)
+
+        print(self.n_label.shape)
+
+        model = Sequential()
+
+        feature_num = 100
+        model.add(Embedding(input_dim=self.VOC_SIZE,output_dim=feature_num,input_length=self.max_length_sequence))
+        model.add(LSTM(units=128))
+        model.add(Dense(units=1,activation="sigmoid"))
+
+        model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
+        model.summary()
+
+        model.fit(self.message_sequence, self.n_label, epochs = 5, batch_size=32, validation_split=0.2)
+
+        y_pred=model.predict(self.message_sequence)
+        y_pred = (y_pred > 0.5)
+        print(y_pred)

@@ -12,6 +12,7 @@ def main():
     spam_classifier.join()
     spam_classifier.messageToNumeric()
     spam_classifier.makeSameSize()
-    spam_classifier.printMessageSequence()
+    #spam_classifier.printMessageSequence()
+    spam_classifier.LSTMModel()
 if __name__ == '__main__':
     main()
